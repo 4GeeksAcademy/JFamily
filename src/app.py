@@ -59,7 +59,7 @@ def create_member():
     print("añadido", member)
     jackson_family.add_member(member)
     if member is not None:
-        return "Miembro creado", 200
+        return "miembro creado", 200
 
 @app.route('/member/<int:id>', methods=['GET'])  #Llamar a un miembro según ID
 def get_single_member(id):
@@ -74,7 +74,7 @@ def handle_add_member():
 
     # Se exigen los datos básicos
     if not data or "first_name" not in data or "age" not in data or "lucky_numbers" not in data:
-        return jsonify({"error": "Missing required fields"}), 400
+        return jsonify({"error": "Faltan campos obligatorios"}), 400
 
     data["last_name"] = jackson_family.last_name  # Agregar el apellido
 
