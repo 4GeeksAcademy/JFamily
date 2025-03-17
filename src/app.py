@@ -49,39 +49,46 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/members', methods=['GET'])
-def handle_hello():
-
-    # this is how you can use the Family datastructure by calling its methods
-    members = jackson_family.get_all_members()
-    response_body = {
-        "hello": "world",
-        "family": members
-    }
-
 @app.route('/members', methods=['GET'])    #Llama a todos los miembros
 def get_all_members():
-    members = jackson_family.get_all_members()
-    return jsonify(members), 200
+    return jsonify(jackson_family.get_all_members()), 200
+
+@app.route('/member', methods=['POST'])
+def create_member():
+    member = request.json
+    print("añadido", member)
+    jackson_family.add_member(member)
+    if member is not None:
+        return "Miembro creado", 200
 
 @app.route('/member/<int:id>', methods=['GET'])  #Llamar a un miembro según ID
 def get_single_member(id):
     member = jackson_family.get_member(id)
-    return jsonify(member), 200
+    if member:
+        return jsonify(member), 200
+    return jsonify({"error": "No se encuentra al miembro"}), 404
 
 @app.route('/add-member', methods=['POST'])
 def handle_add_member():
-    pass
+    data = request.get_json()
+
+    # Se exigen los datos básicos
+    if not data or "first_name" not in data or "age" not in data or "lucky_numbers" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    data["last_name"] = jackson_family.last_name  # Agregar el apellido
+
+    jackson_family.add_member(data)
+    return jsonify("Miembro añadido"), 201
 
 @app.route('/member/<int:id>', methods=['DELETE'])
 def delete_single_member(id):
     member = jackson_family.get_member(id)
- 
+
     if member:
         jackson_family.delete_member(id)
-        return jsonify({"message": f"Member deleted successfully: {member}"}), 200
-    else:
-        return jsonify({"error": "Member not found"}), 404
+        return jsonify({"done": True}), 200  # Devuelve el formato esperado
+    return jsonify({"error": "No se ha encontrado al miembro"}), 404
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
